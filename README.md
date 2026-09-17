@@ -75,35 +75,35 @@ A pillbox that remains unlockable all day is simply an expensive organizer. **Pu
 
 ```mermaid
 graph TD
-    User([Patient / Caregiver / Doctor]) -->|Voice or Text Prescription| WebApp[PulseLock Next.js 15 Web Platform]
+    User(["Patient / Caregiver / Doctor"]) -->|Voice or Text Prescription| WebApp["PulseLock Next.js 15 Web Platform"]
     
-    subgraph Cloud & Edge Intelligence
-        WebApp -->|Natural Language Prompt| AIParser[Clinical AI & NLP Parser<br/>Gemini 1.5 Flash + Rule Engine]
+    subgraph Cloud_Intelligence ["Cloud & Edge Intelligence"]
+        WebApp -->|Natural Language Prompt| AIParser["Clinical AI & NLP Parser<br/>Gemini Flash + Rule Engine"]
         AIParser -->|Structured Prescription JSON| WebApp
-        WebApp -->|Clinical Safety Review Card| Confirmation[Patient Approves Schedule]
-        Confirmation -->|Generate Timeline| DB[(Persistence Engine<br/>Local JSON DB / Supabase PostgreSQL)]
+        WebApp -->|Clinical Safety Review Card| Confirmation["Patient Approves Schedule"]
+        Confirmation -->|Generate Timeline| DB[("Persistence Engine<br/>Local JSON DB / Supabase")]
     end
 
-    subgraph Physical Dispenser Node
-        ESP32[ESP32 Microcontroller Node<br/>DevKit v1] -->|WiFi HTTP GET /api/device| WebApp
+    subgraph Physical_Node ["Physical Dispenser Node"]
+        ESP32["ESP32 Microcontroller Node<br/>DevKit v1"] -->|WiFi HTTP GET /api/device| WebApp
         WebApp -->|Active Window & Lock State| ESP32
         
-        ESP32 -->|Dose Window Arrives| HardwareAlert[Piezo Due Tone + OLED Medication Alert]
+        ESP32 -->|Dose Window Arrives| HardwareAlert["Piezo Due Tone + OLED Medication Alert"]
         
-        User -->|Presses Button 1 / Biometric Scan| ESP32
-        ESP32 -->|Physical Verification| Check{Is Time Window Open?}
+        User -->|Presses Button 1 or Scan| ESP32
+        ESP32 -->|Physical Verification| Check{"Is Time Window Open?"}
         
-        Check -->|YES (Due)| Dispense[Step Servo +23° & Dispense Dose]
-        Dispense -->|Instant Relock| LockState[Set serverWindowOpen = false & Lock Servo]
+        Check -->|Window Open - Due| Dispense["Step Servo +23 deg & Dispense Dose"]
+        Dispense -->|Instant Relock| LockState["Immediate Relock (Servo Locked)"]
         Dispense -->|WiFi HTTP POST /api/device| WebApp
         
-        Check -->|NO (Early)| Reject[Refuse Servo + Double-Beep Warning + OLED Denied Alert]
+        Check -->|Window Closed - Early| Reject["Refuse Servo + Double-Beep Tone + OLED Alert"]
         Reject -->|WiFi HTTP POST /api/device| WebApp
     end
 
-    subgraph Caregiver & Clinical Dashboard
-        WebApp -->|Live Telemetry Poll / SSE| Dashboard[Patient & Caregiver Adherence Dashboard]
-        WebApp -->|Compliance Audit Trail| Stream[Live Access & Tamper Event Stream]
+    subgraph Caregiver_Dashboard ["Caregiver & Clinical Dashboard"]
+        WebApp -->|Live Telemetry Poll| Dashboard["Patient & Caregiver Dashboard"]
+        WebApp -->|Compliance Audit Trail| Stream["Live Access & Tamper Event Stream"]
     end
 ```
 
