@@ -1,35 +1,116 @@
-export type Role = 'patient' | 'caregiver' | 'admin';
-export type RiskLevel = 'Normal' | 'Elevated' | 'High';
-export type DoseStatus = 'completed' | 'available' | 'upcoming' | 'missed';
-export type EventType = 'scheduled' | 'access' | 'verified' | 'denied' | 'cooling' | 'reset' | 'unlocked' | 'removed' | 'missed' | 'tamper' | 'notified' | 'device';
+export type DoseStatus = 'upcoming' | 'available' | 'accessed' | 'missed';
+export type PrescriptionStatus = 'draft' | 'confirmed' | 'active' | 'paused' | 'completed';
+export type DeviceEventType = 'access_granted' | 'access_denied' | 'sync' | 'unlocked' | 'tamper' | 'manual_override';
+
+export interface User {
+  id: string;
+  username: string;
+  full_name: string;
+  pin: string;
+  created_at: string;
+  email?: string;
+  phone?: string;
+  emergency_contact?: string;
+}
+
+export interface Prescription {
+  id: string;
+  user_id: string;
+  status: PrescriptionStatus;
+  start_date: string;
+  end_date?: string;
+  notes?: string;
+  created_at: string;
+  medications?: Medication[];
+}
 
 export interface Medication {
-  id: string; name: string; strength: string; dose: string; form: string; quantity: number;
-  times: string[]; instructions: string; window: string; adherence: number; color: string;
+  id: string;
+  prescription_id: string;
+  name: string;
+  strength: string; // e.g. "500 mg"
+  dose_amount: string; // e.g. "1 tablet"
+  dose_unit: string; // e.g. "tablet"
+  frequency: string; // e.g. "2x daily"
+  scheduled_times: string[]; // e.g. ["08:00", "20:00"]
+  food_instruction: string; // e.g. "after food"
+  duration_days: number; // e.g. 30
+  compartment_id: string; // e.g. "C01", "C02"
+  color: string;
+  total_pills?: number;
+  remaining_pills?: number;
+  created_at?: string;
 }
-export interface Dose { id: string; medicationId: string; time: string; status: DoseStatus; day: string }
-export interface PulseEvent { id: string; type: EventType; title: string; detail: string; time: string; medication?: string; }
-export interface Device { connected: boolean; lockState: 'Locked' | 'Unlocked'; heartRate: number; baseline: number; battery: number; lastSync: string; weight: number; tamper: boolean; }
-export interface RiskAssessment { score: number; level: RiskLevel; explanation: string; }
 
-export const seedMedications: Medication[] = [
-  { id: 'm1', name: 'Paracetamol', strength: '500 mg', dose: '1 tablet', form: 'Tablet', quantity: 18, times: ['10:00', '18:00'], instructions: 'With water, after food if preferred.', window: '±30 minutes', adherence: 96, color: '#d47567' },
-  { id: 'm2', name: 'Vitamin D', strength: '1000 IU', dose: '1 capsule', form: 'Capsule', quantity: 24, times: ['12:30'], instructions: 'Take with a meal containing healthy fats.', window: '±30 minutes', adherence: 100, color: '#bca56a' },
-  { id: 'm3', name: 'Metformin', strength: '500 mg', dose: '1 tablet', form: 'Tablet', quantity: 40, times: ['08:00', '20:00'], instructions: 'Take with meals.', window: '±30 minutes', adherence: 88, color: '#8e9d8a' }
-];
+export interface DoseSchedule {
+  id: string;
+  medication_id: string;
+  scheduled_datetime: string; // ISO 8601 string
+  compartment_id: string; // "C01", "C02"
+  status: DoseStatus;
+  accessed_at?: string | null;
+  access_method?: 'biometric' | 'manual_override';
+  notes?: string;
+  created_at?: string;
+  medication?: Medication;
+}
 
-export const seedDoses: Dose[] = [
-  { id: 'd1', medicationId: 'm3', time: '08:00', status: 'completed', day: 'Today' },
-  { id: 'd2', medicationId: 'm1', time: '10:00', status: 'available', day: 'Today' },
-  { id: 'd3', medicationId: 'm2', time: '12:30', status: 'upcoming', day: 'Today' },
-  { id: 'd4', medicationId: 'm1', time: '18:00', status: 'upcoming', day: 'Today' },
-  { id: 'd5', medicationId: 'm3', time: '20:00', status: 'upcoming', day: 'Today' },
-  { id: 'd6', medicationId: 'm1', time: '18:00', status: 'missed', day: 'Yesterday' }
-];
+export interface DeviceEvent {
+  id: string;
+  dose_schedule_id?: string | null;
+  device_id: string;
+  event_type: DeviceEventType;
+  compartment?: string;
+  patient_id?: string;
+  status: string;
+  timestamp: string;
+  raw_payload?: Record<string, any>;
+  medication_name?: string;
+}
 
-export const seedEvents: PulseEvent[] = [
-  { id: 'e1', type: 'verified', title: 'Identity confirmed', detail: 'Demo fingerprint verification completed.', time: '08:01', medication: 'Metformin' },
-  { id: 'e2', type: 'removed', title: 'Dose removal confirmed', detail: 'Weight change detected after access.', time: '08:02', medication: 'Metformin' },
-  { id: 'e3', type: 'missed', title: 'Dose window closed', detail: 'Yesterday’s evening dose was not confirmed.', time: 'Yesterday, 18:31', medication: 'Paracetamol' },
-  { id: 'e4', type: 'device', title: 'Device synchronized', detail: 'PulseLock is connected and ready.', time: 'Yesterday, 17:46' }
-];
+export interface ParsedPrescriptionAI {
+  medicine: string;
+  strength: string;
+  dose: string;
+  frequency: string;
+  times: string[];
+  food: string;
+  duration_days: number;
+  confidence?: number;
+}
+
+export interface AdherenceStats {
+  overall_rate: number;
+  scheduled_count: number;
+  accessed_count: number;
+  missed_count: number;
+  upcoming_count: number;
+  weekly_trend: {
+    day: string;
+    date: string;
+    rate: number;
+    scheduled: number;
+    accessed: number;
+  }[];
+  medication_breakdown: {
+    name: string;
+    strength: string;
+    scheduled: number;
+    accessed: number;
+    rate: number;
+    color: string;
+    remaining_pills?: number;
+    total_pills?: number;
+  }[];
+}
+
+export interface PulseLockDeviceState {
+  deviceId: string;
+  connected: boolean;
+  battery: number;
+  lastSync: string;
+  lockStatus: 'Locked' | 'Unlocked';
+  activeCompartment: string | null;
+  activeDose: DoseSchedule | null;
+  serverIp?: string;
+}

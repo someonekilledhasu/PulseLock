@@ -1,13 +1,28 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import './extra.css';
-import './landing.css';
 
 export const metadata: Metadata = {
-  title: 'PulseLock — Smart medication access',
-  description: 'Adaptive medication access, built around you.'
+  title: 'PulseLock | Biometric Connected Medication Adherence System',
+  description: 'Smart prescription scheduling connected to physical biometric access control.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+export const viewport: Viewport = {
+  themeColor: '#090b10',
+  width: 'device-width',
+  initialScale: 1,
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
 }
