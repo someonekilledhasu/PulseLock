@@ -12,7 +12,7 @@
 **A physical access control layer around chronic prescriptions.**  
 *Connecting clinical natural language processing to locked, time-gated biometric pill compartments.*
 
-[Live Web App](#-quick-start-guide) • [The Core USP](#-the-core-usp-strict-physical-time-window-lockout) • [Hardware Wiring](#-hardware-engineering--pinout) • [Firmware Guide](#-esp32-firmware-guide) • [REST API](#-rest-api-reference) • [Judge Pitch](#-90-second-hackathon-pitch-script)
+[Hasu's Setup Guide](GUIDE_FOR_HASU.md) • [Live Web App](#-quick-start-guide) • [The Core USP](#-the-core-usp-strict-physical-time-window-lockout) • [Hardware Wiring](#-hardware-engineering--pinout) • [Firmware Guide](#-esp32-firmware-guide) • [REST API](#-rest-api-reference) • [Judge Pitch](#-90-second-hackathon-pitch-script)
 
 </div>
 
